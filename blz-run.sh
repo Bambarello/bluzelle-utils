@@ -23,7 +23,7 @@ sed -i -e 's/allow_duplicate_ip = false/allow_duplicate_ip = true/g' ~/.blzd/con
 if [ "$MONIKER" != "sentry" ]; then
     echo -e "$SEED\n" | blzcli keys add --recover $MONIKER --keyring-backend test
     unset SEED
-    sed -i -e 's/pex = true/pex = false/g' ~/.blzd/config/config.toml
+    sed -i -e 's/pex = false/pex = true/g' ~/.blzd/config/config.toml
     
     SENTRY_ADDR="$(cat ~/sentry_address.txt)@$EXTERNAL_IP:26686"
     echo "Sentry address $SENTRY_ADDR"
@@ -33,7 +33,8 @@ if [ "$MONIKER" != "sentry" ]; then
     --pruning nothing \
     --p2p.laddr $P2P_LADDR \
     --rpc.laddr $RPC_LADDR \
-    --p2p.persistent_peers $SENTRY_ADDR &
+    --p2p.persistent_peers $SENTRY_ADDR,$PERSISTENT_PEERS \
+    --p2p.seeds $PERSISTENT_PEERS
     
     sleep 30
     VALIDATOR_ID=$(blzcli status --node $RPC_LADDR | jq -r .node_info.id)
