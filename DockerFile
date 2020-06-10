@@ -1,0 +1,29 @@
+FROM ubuntu:18.04
+MAINTAINER c29r3
+
+RUN echo 'debconf debconf/frontend select Noninteractive' | debconf-set-selections \
+    apt-get update && apt-get install -y --no-install-recommends apt-utils \
+    apt-transport-https ca-certificates jq nano wget curl htop git make gcc build-essential \
+    wget https://dl.google.com/go/go1.14.2.linux-amd64.tar.gz \
+        && tar -C /usr/local -xzf go1.14.2.linux-amd64.tar.gz \
+        && rm go1.14.2.linux-amd64.tar.gz \
+        && mkdir -p /root/go/bin \
+        && mkdir -p /root/go/pkg \
+    git clone https://github.com/bluzelle/curium.git \
+        && cd /root/go/src/github.com/bluzelle/ \
+        && make testnet \
+        && /root/go/src/github.com/bluzelle/curium \
+        && cp /root/go/bin/blzd /usr/bin/ \
+        && cp /root/go/bin/blzcli /usr/bin/
+
+ENV GO111MODULE=on \
+    CGO_ENABLED=0 \
+    GOOS=linux \
+    GOARCH=amd64 \
+    GOROOT=/usr/local/go \
+    GOPATH=/root/go \
+    GOBIN=/root/go/bin \
+    PATH=$PATH:/usr/local/go/bin
+
+WORKDIR /root
+CMD curl -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/blz-run.sh | /bin/bash

@@ -1,0 +1,33 @@
+version: '3'
+
+services:
+  bluzelle-sentry:
+ #   build:
+ #     context: .
+ #     dockerfile: DockerFile
+    container_name: bluzelle-sentry
+    image: c29r3/bluzelle-curium1:latest
+    ports:
+      - "26686:26686"
+      - "26687:26687"
+      - "1387:1387"
+    environment:
+      MONIKER:          "sentry"
+      P2P_LADDR:        "tcp://0.0.0.0:26686"
+      RPC_LADDR:        "tcp://127.0.0.1:26687"
+      REST_ADDR:        "tcp://127.0.0.1:1387"
+      PERSISTENT_PEERS: "5224b9e64f8a26a47964253f689bad5bfa370e53@a.sentry.testnet.public.bluzelle.com:26656,9280eddba4964fa35a20ea019106e974da12e1d5@b.sentry.testnet.public.bluzelle.com:26656,ad70b60496091ab631b4a0728da17e49d8711d44@c.sentry.testnet.public.bluzelle.com:26656,4cae035afb5c9ed47683c40b2c9d362377156cf9@d.sentry.testnet.public.bluzelle.com:26656,aa01d651273f4f44d846e76f76801ce5bbbbf738@e.sentry.testnet.public.bluzelle.com:26656,06cfb6375580bbf7a00a134aebccb10e6779d463@f.sentry.testnet.public.bluzelle.com:26656,1021ad08bced54b6e9b586676712969c89eae4f8@35.183.5.231:26656,77ad53fe9f11fd923c386ce434e2dcc05c5699cb@54.95.162.196:26656,836f75dee3d01a62340ac851aabaedd4b2d798af@95.111.251.126:26656"
+    expose:
+      - "26686"
+      - "26687"
+      - "1387"
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "50m"
+        max-file: "10"
+    restart: unless-stopped
+    volumes:
+      - "./sentry_address.txt:/root/sentry_address.txt"
+      - "./nodes_ids.txt:/root/nodes_ids.txt"
+      - "./nodes_addresses.txt:/root/nodes_addresses.txt"
