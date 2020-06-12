@@ -1,4 +1,4 @@
-blzcli tx staking create-validator \
+$(which blzcli) tx staking create-validator \
   --amount=10000000ubnt \
   --pubkey=$(blzd tendermint show-validator) \
   --website="" \
@@ -13,5 +13,5 @@ blzcli tx staking create-validator \
   --gas-adjustment=1.5 \
   --gas auto \
   --gas-prices=10.0ubnt \
-  --node $RPC_LADDR \
+  --node tcp://127.0.0.1:26657 \
   --from $MONIKER -y
