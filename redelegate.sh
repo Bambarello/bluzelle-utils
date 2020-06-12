@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BIN_FILE="/usr/bin/blzcli"
+BIN_FILE=$(which blzcli)
 CHAIN_ID="bluzelle"
 SELF_ADDR=$($BIN_FILE keys list | jq -r .[0].address)
 DENOM=$($BIN_FILE q staking delegations --chain-id $CHAIN_ID --node $RPC_LADDR  $SELF_ADDR | jq -r .[].balance.denom)
