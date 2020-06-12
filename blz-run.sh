@@ -1,13 +1,14 @@
- 
 #!/bin/sh
-
+apt install -y curl jq htop nano
 blzd init $MONIKER --chain-id bluzelle
 blzcli config chain-id bluzelle
 blzcli config output json
 blzcli config indent true
 blzcli config trust-node true
 blzcli config keyring-backend test
+curl=$(which curl)
 EXTERNAL_IP=$(curl -s 2ip.ru)
+RPC_LADDR=tcp://127.0.0.1:26657
 
 sed -i -e 's/minimum-gas-prices = ""/minimum-gas-prices = "10.0ubnt"/g' \
     ~/.blzd/config/app.toml
@@ -21,43 +22,25 @@ wget https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/genesis.json 
 sed -i -e 's/allow_duplicate_ip = false/allow_duplicate_ip = true/g' ~/.blzd/config/config.toml
 
 if [ "$MONIKER" != "sentry" ]; then
-    echo -e "$SEED\n" | blzcli keys add --recover $MONIKER --keyring-backend test
+    echo $SEED | blzcli keys add --recover $MONIKER --keyring-backend test
     unset SEED
     sed -i -e 's/pex = false/pex = true/g' ~/.blzd/config/config.toml
-    
-#     SENTRY_ADDR="$(cat ~/sentry_address.txt)@$EXTERNAL_IP:26686"
-#     echo "Sentry address $SENTRY_ADDR"
     
     blzd start \
     --moniker $MONIKER \
     --pruning nothing \
     --p2p.laddr $P2P_LADDR \
     --rpc.laddr $RPC_LADDR \
-    --p2p.persistent_peers $SENTRY_ADDR,$PERSISTENT_PEERS \
-    --p2p.seeds $PERSISTENT_PEERS
-    
- #   sleep 30
-#     VALIDATOR_ID=$(blzcli status --node $RPC_LADDR | jq -r .node_info.id)
-#     echo -e "Validator ID: $VALIDATOR_ID"
-#     if ! grep -Fxq $VALIDATOR_ID ~/nodes_ids.txt; then
-#         echo $VALIDATOR_ID >> ~/nodes_ids.txt
-#     fi
-    
-#     VALIDATOR_P2P_PORT=$(echo $P2P_LADDR | cut -d ":" -f3)
-#     VALIDATOR_ADDRESS="$VALIDATOR_ID@$EXTERNAL_IP:$VALIDATOR_P2P_PORT"
-#     echo -e "Validator address: $VALIDATOR_ADDRESS"
-#     if ! grep -Fxq $VALIDATOR_ADDRESS ~/nodes_addresses.txt; then
-#        echo $VALIDATOR_ADDRESS >> ~/nodes_addresses.txt
-#     fi
-    
-    RPC_LADDR="tcp://127.0.0.1:26657"
+    --p2p.persistent_peers $PERSISTENT_PEERS &
+
+    sleep 60
     SYNC_STATUS=$(blzcli status --node $RPC_LADDR | jq .sync_info.catching_up)
     while [[ $SYNC_STATUS != "false" ]]; do
         SYNC_STATUS=$(blzcli status --node $RPC_LADDR | jq .sync_info.catching_up)
         sleep 10
     done
     echo -e "Creating stake for $MONIKER"
-    curl -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/create-stake.sh | /bin/bash
+    $(which curl) -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/create-stake.sh | /bin/bash
     
     while true; 
     do 
@@ -65,12 +48,11 @@ if [ "$MONIKER" != "sentry" ]; then
         STATUS=$(blzcli query staking validator $OPERATOR --node $RPC_LADDR --trust-node -o json | jq -r .status)
         if [[ $STATUS != "2" ]]; then
             echo "UNJAIL"
-            curl -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/unjail.sh | /bin/bash
+            $(which curl) -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/unjail.sh | /bin/bash
         fi
         sleep 520
-        curl -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/redelegate.sh | bash &
+        $(which curl) -s https://raw.githubusercontent.com/c29r3/bluzelle-utils/master/redelegate.sh | bash &
     done
-#     blzcli rest-server --laddr $REST_ADDR
 
 else
     echo $PERSISTENT_PEERS
