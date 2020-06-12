@@ -1,6 +1,6 @@
 $(which blzcli) tx staking create-validator \
   --amount=10000000ubnt \
-  --pubkey=$(blzd tendermint show-validator) \
+  --pubkey=$($(which blzd) tendermint show-validator) \
   --website="" \
   --details="" \
   --security-contact="" \
