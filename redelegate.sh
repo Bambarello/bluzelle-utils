@@ -1,5 +1,6 @@
 #!/bin/bash
 
+RPC_LADDR="tcp://127.0.0.1:26657"
 BIN_FILE=$(which blzcli)
 CHAIN_ID="bluzelle"
 SELF_ADDR=$($BIN_FILE keys list | jq -r .[0].address)
