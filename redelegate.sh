@@ -14,7 +14,7 @@ BALANCE=$($BIN_FILE query account $SELF_ADDR --node $RPC_LADDR -o json | jq -r .
 echo CURRENT BALANCE IS: $BALANCE
 REWARD=$(( $BALANCE - 1008000000 ))
 
-if (( $BALANCE >=  2008000000 )); then
+if (( $BALANCE >  2008000000 )); then
     echo "Let's delegate $REWARD of REWARD tokens to $SELF_ADDR"
     # delegate balance
     $BIN_FILE tx staking delegate $OPERATOR "$REWARD"$DENOM --chain-id $CHAIN_ID --node $RPC_LADDR --gas-adjustment 1.5 --gas auto --gas-prices "10.0"$DENOM --from $MONIKER -y
